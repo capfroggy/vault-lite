@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4efe7;
+  --foreground: #13110d;
+  --surface: rgba(255, 251, 245, 0.78);
+  --surface-strong: rgba(255, 251, 245, 0.96);
+  --surface-dark: rgba(22, 18, 14, 0.86);
+  --line: rgba(31, 24, 17, 0.12);
+  --line-strong: rgba(31, 24, 17, 0.2);
+  --accent: #db8f34;
+  --accent-deep: #8f5a16;
+  --teal: #0f7d7b;
+  --danger: #a4432c;
+  --success: #176b4e;
+  --shadow: 0 18px 60px rgba(31, 24, 17, 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-plex-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(219, 143, 52, 0.2), transparent 28%),
+    radial-gradient(circle at top right, rgba(15, 125, 123, 0.16), transparent 32%),
+    linear-gradient(180deg, #f7f2eb 0%, #efe6d9 100%);
+  color: var(--foreground);
+  font-family: var(--font-manrope), sans-serif;
+}
+
+::selection {
+  background: rgba(219, 143, 52, 0.24);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+button {
+  cursor: pointer;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(219, 143, 52, 0.6);
+  outline-offset: 2px;
+}
+
+.vault-shell {
+  position: relative;
+}
+
+.vault-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(19, 17, 13, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(19, 17, 13, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 52%, transparent 100%);
+}
+
+.panel-glass {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+}
+
+.panel-solid {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.panel-dark {
+  background: linear-gradient(180deg, rgba(31, 24, 17, 0.9) 0%, rgba(22, 18, 14, 0.98) 100%);
+  border: 1px solid rgba(255, 244, 229, 0.08);
+  box-shadow: 0 20px 60px rgba(14, 11, 8, 0.26);
+  color: #fdf8f2;
+}
+
+.metric-ring {
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.26),
+    transparent 38%,
+    transparent 62%,
+    rgba(255, 255, 255, 0.12)
+  );
+  pointer-events: none;
+}
+
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 24, 17, 0.2) transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(31, 24, 17, 0.18);
+  border-radius: 999px;
+}
