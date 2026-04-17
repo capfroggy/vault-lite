@@ -1,11 +1,11 @@
 import { openDB, type DBSchema } from "idb";
 import {
   DEFAULT_SETTINGS,
-  encryptedVaultRecordSchema,
   settingsSchema,
   type EncryptedVaultRecord,
   type VaultSettings,
 } from "@/lib/types";
+import { normalizeEncryptedVaultRecord } from "@/lib/vault-migration";
 
 interface VaultLiteSchema extends DBSchema {
   vaults: {
@@ -40,12 +40,21 @@ function getDatabase() {
 export async function getEncryptedVault() {
   const database = await getDatabase();
   const value = await database.get("vaults", PRIMARY_VAULT_KEY);
-  return value ? encryptedVaultRecordSchema.parse(value) : null;
+  if (!value) {
+    return null;
+  }
+
+  const normalized = normalizeEncryptedVaultRecord(value);
+  if (value.version !== normalized.version) {
+    await database.put("vaults", normalized, PRIMARY_VAULT_KEY);
+  }
+
+  return normalized;
 }
 
 export async function saveEncryptedVault(record: EncryptedVaultRecord) {
   const database = await getDatabase();
-  await database.put("vaults", encryptedVaultRecordSchema.parse(record), PRIMARY_VAULT_KEY);
+  await database.put("vaults", normalizeEncryptedVaultRecord(record), PRIMARY_VAULT_KEY);
 }
 
 export async function getVaultSettings() {

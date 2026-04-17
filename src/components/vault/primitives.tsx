@@ -9,6 +9,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
+import { useId } from "react";
 
 export function MetricCard({
   label,
@@ -192,27 +193,48 @@ export function SecureInput({
 
 export function FileDropRow({
   fileName,
+  helperText = "Accepts VaultLite encrypted backup JSON files.",
+  inputId,
   onChange,
 }: {
   fileName: string | null;
+  helperText?: string;
+  inputId?: string;
   onChange: (file: File | null) => void;
 }) {
+  const generatedId = useId();
+  const resolvedInputId = inputId ?? generatedId;
+  const descriptionId = `${resolvedInputId}-description`;
+
   return (
-    <label className="flex cursor-pointer items-center justify-between rounded-3xl border border-dashed border-[rgba(19,17,13,0.16)] bg-white/70 px-4 py-4 text-sm text-[#5f5044] hover:border-[rgba(19,17,13,0.28)]">
-      <span className="flex min-w-0 items-center gap-3">
-        <CloudArrowUpIcon className="size-4 shrink-0" />
-        <span className="truncate">{fileName ?? "Choose a backup JSON file"}</span>
-      </span>
-      <input
-        type="file"
-        accept=".json,application/json"
-        className="hidden"
-        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-      />
-      <span className="rounded-full bg-[rgba(19,17,13,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#5f5044]">
-        Browse
-      </span>
-    </label>
+    <div className="grid gap-2">
+      <label
+        htmlFor={resolvedInputId}
+        className="flex cursor-pointer items-center justify-between rounded-3xl border border-dashed border-[rgba(19,17,13,0.16)] bg-white/70 px-4 py-4 text-sm text-[#5f5044] hover:border-[rgba(19,17,13,0.28)]"
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <CloudArrowUpIcon className="size-4 shrink-0" />
+          <span className="truncate">{fileName ?? "Choose a backup JSON file"}</span>
+          <span className="sr-only">
+            {fileName ? `Selected file ${fileName}.` : "No file selected."} {helperText}
+          </span>
+        </span>
+        <input
+          id={resolvedInputId}
+          type="file"
+          accept=".json,application/json"
+          aria-describedby={descriptionId}
+          className="sr-only"
+          onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+        />
+        <span className="rounded-full bg-[rgba(19,17,13,0.08)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[#5f5044]">
+          Browse
+        </span>
+      </label>
+      <p id={descriptionId} className="text-xs leading-5 text-[#7c6349]">
+        {fileName ? `Selected file: ${fileName}. ${helperText}` : helperText}
+      </p>
+    </div>
   );
 }
 

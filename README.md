@@ -16,10 +16,11 @@ This project is designed to be worth discussing in GitHub reviews, interviews, a
 - local vault creation and unlock flow
 - PBKDF2-based key derivation with per-vault salt
 - AES-GCM encryption for the stored vault blob
-- encrypted backup export and restore
+- encrypted backup export, restore preview, and unlocked import with merge-or-replace flows
 - inactivity-based auto-lock
-- password generator and basic vault hygiene signals
-- unit tests plus CI for crypto and password utilities
+- password generator, clipboard auto-clear, and actionable vault hygiene signals
+- risk filters, entry audit trail, custom fields, and schema migration support
+- unit tests plus CI for crypto, migration, and password utilities
 
 ## Stack
 
@@ -75,10 +76,9 @@ docs/
 
 ## Next improvements
 
-- import replacement flow while already unlocked
-- stronger password audit rules
-- schema migration support for encrypted backups
-- keyboard shortcuts and accessibility pass
+- per-entry attachments with explicit size and safety limits
+- broader accessibility pass for focus flow and screen readers
 - optional WebAuthn-assisted unlock experiments
+- deeper persistence and recovery tests around lock timing and interrupted restore flows
 
 For planned milestones, see [docs/roadmap.md](./docs/roadmap.md).

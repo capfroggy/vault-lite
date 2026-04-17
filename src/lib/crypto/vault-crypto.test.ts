@@ -14,6 +14,8 @@ describe("vault crypto", () => {
         website: "https://github.com",
         notes: "",
         tags: ["work"],
+        customFields: [],
+        history: [],
         favorite: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -25,6 +27,38 @@ describe("vault crypto", () => {
 
     expect(record.cipher.algorithm).toBe("AES-GCM");
     expect(unlocked.vault.entries[0]?.title).toBe("GitHub");
+  });
+
+  it("normalizes a legacy vault snapshot before encrypting it", async () => {
+    const legacyVault = {
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      entries: [
+        {
+          id: crypto.randomUUID(),
+          title: "GitHub",
+          username: "brad@example.com",
+          password: "Moss-Cascade-Frame-2719!",
+          website: "https://github.com",
+          notes: "",
+          tags: ["work"],
+          favorite: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    const { record } = await createEncryptedVault(
+      "Forest-Starlight-Bridge-4401!",
+      legacyVault as never,
+    );
+    const unlocked = await unlockVault("Forest-Starlight-Bridge-4401!", record);
+
+    expect(unlocked.vault.version).toBe(2);
+    expect(unlocked.vault.entries[0]?.title).toBe("GitHub");
+    expect(unlocked.vault.entries[0]?.customFields).toEqual([]);
+    expect(unlocked.vault.entries[0]?.history).toHaveLength(1);
   });
 
   it("rejects an invalid master password", async () => {
@@ -50,6 +84,8 @@ describe("vault crypto", () => {
           website: "https://linkedin.com",
           notes: "",
           tags: ["career"],
+          customFields: [],
+          history: [],
           favorite: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

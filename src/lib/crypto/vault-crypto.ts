@@ -1,11 +1,13 @@
 import {
   createEmptyVault,
-  encryptedVaultRecordSchema,
-  vaultSchema,
   type EncryptedVaultRecord,
   type Vault,
 } from "@/lib/types";
 import { base64ToBytes, bytesToBase64 } from "@/lib/crypto/base64";
+import {
+  migrateVaultSnapshot,
+  normalizeEncryptedVaultRecord,
+} from "@/lib/vault-migration";
 
 const AES_KEY_LENGTH = 256;
 const GCM_IV_LENGTH = 12;
@@ -98,10 +100,11 @@ export async function createEncryptedVault(
   password: string,
   initialVault: Vault = createEmptyVault(),
 ) {
+  const normalizedVault = migrateVaultSnapshot(initialVault);
   const salt = bytesToBase64(getRandomBytes(SALT_LENGTH));
   const key = await deriveAesKey(password, salt, PBKDF2_ITERATIONS);
-  const record = await sealVault(initialVault, key, {
-    createdAt: initialVault.createdAt,
+  const record = await sealVault(normalizedVault, key, {
+    createdAt: normalizedVault.createdAt,
     kdf: {
       algorithm: "PBKDF2",
       hash: "SHA-256",
@@ -113,18 +116,23 @@ export async function createEncryptedVault(
   return {
     key,
     record,
-    vault: initialVault,
+    vault: normalizedVault,
   };
 }
 
 export async function unlockVault(password: string, record: EncryptedVaultRecord) {
-  const key = await deriveAesKey(password, record.kdf.salt, record.kdf.iterations);
+  const normalizedRecord = normalizeEncryptedVaultRecord(record);
+  const key = await deriveAesKey(
+    password,
+    normalizedRecord.kdf.salt,
+    normalizedRecord.kdf.iterations,
+  );
 
   try {
-    const payload = await decryptPayload(record, key);
+    const payload = await decryptPayload(normalizedRecord, key);
     return {
       key,
-      vault: vaultSchema.parse(JSON.parse(payload)),
+      vault: migrateVaultSnapshot(JSON.parse(payload)),
     };
   } catch {
     throw new Error("Unable to unlock the vault. Check the master password.");
@@ -136,7 +144,7 @@ export async function sealVault(
   key: CryptoKey,
   metadata: VaultMetadata,
 ): Promise<EncryptedVaultRecord> {
-  const normalizedVault = vaultSchema.parse(vault);
+  const normalizedVault = migrateVaultSnapshot(vault);
   const now = new Date().toISOString();
   const payload = JSON.stringify({
     ...normalizedVault,
@@ -144,7 +152,7 @@ export async function sealVault(
   });
   const encrypted = await encryptPayload(payload, key);
 
-  return encryptedVaultRecordSchema.parse({
+  return normalizeEncryptedVaultRecord({
     format: "vault-lite",
     version: 1,
     vaultId: "primary",
